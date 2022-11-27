@@ -11,6 +11,12 @@ class TaskEntity extends HiveObject {
   Priority priority = Priority.low;
 }
 
+@HiveType(typeId: 1)
 enum Priority {
-  low,norma,high
+  @HiveField(0)
+  low,
+  @HiveField(1)
+  norma,
+  @HiveField(2)
+  high
 }
