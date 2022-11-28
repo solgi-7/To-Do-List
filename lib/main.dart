@@ -41,6 +41,7 @@ class MyApp extends StatelessWidget {
           //   )
           // ),
           inputDecorationTheme: const InputDecorationTheme(
+              floatingLabelBehavior: FloatingLabelBehavior.never,
               labelStyle: TextStyle(color: secondryTextColor),
               border: InputBorder.none),
           colorScheme: const ColorScheme.light(
@@ -53,20 +54,16 @@ class MyApp extends StatelessWidget {
             secondary: primaryColor,
             onSecondary: Colors.white,
           )),
-      home: const HomeScreen(),
+      home: HomeScreen(),
     );
   }
 }
 
-class HomeScreen extends StatefulWidget {
-  const HomeScreen({Key? key}) : super(key: key);
+class HomeScreen extends StatelessWidget {
+  HomeScreen({Key? key}) : super(key: key);
 
-  @override
-  State<HomeScreen> createState() => _HomeScreenState();
-}
-
-class _HomeScreenState extends State<HomeScreen> {
   final TextEditingController _searchController = TextEditingController();
+  final ValueNotifier<String> searchKeyWordNotifier = ValueNotifier('');
 
   @override
   Widget build(BuildContext context) {
@@ -117,7 +114,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       child: TextField(
                         controller: _searchController,
                         onChanged: (value) {
-                          setState(() {});
+                          searchKeyWordNotifier.value = _searchController.text;
                         },
                         decoration: const InputDecoration(
                           label: Text('Search tasks...'),
@@ -132,83 +129,91 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ),
             Expanded(
-              child: ValueListenableBuilder<Box<TaskEntity>>(
-                  valueListenable: box.listenable(),
-                  builder: (context, boxValue, child) {
-                    final items;
-                    if (_searchController.text.isEmpty) {
-                      items = box.values.toList();
-                    } else {
-                      items = box.values.where(
-                        (element) =>
-                            element.name.contains(_searchController.text),
-                      ).toList();
-                    }
-                    if (items.isNotEmpty) {
-                      return ListView.builder(
-                        itemCount: items.length + 1,
-                        padding: const EdgeInsets.only(
-                            right: 16, top: 16, left: 16, bottom: 100),
-                        itemBuilder: (context, index) {
-                          if (index == 0) {
-                            return Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
+              child: ValueListenableBuilder<String>(
+                valueListenable: searchKeyWordNotifier,
+                builder: (context, value, child) {
+                  return ValueListenableBuilder<Box<TaskEntity>>(
+                      valueListenable: box.listenable(),
+                      builder: (context, boxValue, child) {
+                        final List<TaskEntity> items;
+                        if (_searchController.text.isEmpty) {
+                          items = box.values.toList();
+                        } else {
+                          items = box.values
+                              .where(
+                                (element) => element.name
+                                    .contains(_searchController.text),
+                              )
+                              .toList();
+                        }
+                        if (items.isNotEmpty) {
+                          return ListView.builder(
+                            itemCount: items.length + 1,
+                            padding: const EdgeInsets.only(
+                                right: 16, top: 16, left: 16, bottom: 100),
+                            itemBuilder: (context, index) {
+                              if (index == 0) {
+                                return Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
                                   children: [
-                                    Text(
-                                      'Today',
-                                      style: themeData.textTheme.headline6!
-                                          .apply(fontSizeFactor: 0.8),
+                                    Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          'Today',
+                                          style: themeData.textTheme.headline6!
+                                              .apply(fontSizeFactor: 0.8),
+                                        ),
+                                        Container(
+                                          width: 70,
+                                          height: 3,
+                                          margin: const EdgeInsets.only(top: 4),
+                                          decoration: BoxDecoration(
+                                            color: primaryColor,
+                                            borderRadius:
+                                                BorderRadius.circular(1.5),
+                                          ),
+                                        )
+                                      ],
                                     ),
-                                    Container(
-                                      width: 70,
-                                      height: 3,
-                                      margin: const EdgeInsets.only(top: 4),
-                                      decoration: BoxDecoration(
-                                        color: primaryColor,
-                                        borderRadius:
-                                            BorderRadius.circular(1.5),
+                                    MaterialButton(
+                                      onPressed: () {
+                                        box.clear();
+                                      },
+                                      elevation: 0,
+                                      textColor: secondryTextColor,
+                                      color: const Color(0xffEAEFF5),
+                                      child: Row(
+                                        children: const [
+                                          Text(
+                                            'Delete All',
+                                          ),
+                                          SizedBox(
+                                            width: 4,
+                                          ),
+                                          Icon(
+                                            CupertinoIcons.delete_solid,
+                                            size: 18,
+                                          ),
+                                        ],
                                       ),
                                     )
                                   ],
-                                ),
-                                MaterialButton(
-                                  onPressed: () {
-                                    box.clear();
-                                  },
-                                  elevation: 0,
-                                  textColor: secondryTextColor,
-                                  color: const Color(0xffEAEFF5),
-                                  child: Row(
-                                    children: const [
-                                      Text(
-                                        'Delete All',
-                                      ),
-                                      SizedBox(
-                                        width: 4,
-                                      ),
-                                      Icon(
-                                        CupertinoIcons.delete_solid,
-                                        size: 18,
-                                      ),
-                                    ],
-                                  ),
-                                )
-                              ],
-                            );
-                          } else {
-                            final TaskEntity task =
-                                items[index - 1];
-                            return TaskItem(taskEntity: task);
-                          }
-                        },
-                      );
-                    } else {
-                      return const EmptyState();
-                    }
-                  }),
+                                );
+                              } else {
+                                final TaskEntity task = items[index - 1];
+                                return TaskItem(taskEntity: task);
+                              }
+                            },
+                          );
+                        } else {
+                          return const EmptyState();
+                        }
+                      });
+                },
+              ),
             ),
           ],
         ),
