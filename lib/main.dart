@@ -1,15 +1,12 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:to_do_task/data/data_entity.dart';
 import 'package:to_do_task/data/repo/repository.dart';
 import 'package:to_do_task/data/source/hive_task_source.dart';
-import 'package:to_do_task/screens/edit/edit.dart';
 import 'package:to_do_task/screens/home/home.dart';
-import 'package:to_do_task/widgets.dart';
 
 const boxName = 'boxName';
 
@@ -65,7 +62,7 @@ class MyApp extends StatelessWidget {
             secondary: primaryColor,
             onSecondary: Colors.white,
           )),
-      home: HomeScreen(),
+      home:  HomeScreen(),
     );
   }
 }
